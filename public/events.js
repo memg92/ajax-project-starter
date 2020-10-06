@@ -5,7 +5,8 @@ const upVote = document.querySelector("#upvote");
 const downVote = document.querySelector("#downvote");
 const score = document.querySelector(".score");
 const commentPost = document.querySelector(".comment-form");
-const comments = document.querySelector(".comments")
+const comments = document.querySelector(".comments");
+const userComment = document.getElementById("user-comment");
 
 document.addEventListener("DOMContentLoaded", async (event) => {
   const res = await fetch("/kitten/image");
@@ -51,7 +52,7 @@ upVote.addEventListener("click", async (event) => {
 
 downVote.addEventListener("click", async (event) => {
   const res = await fetch("/kitten/downvote", {
-    method: "PATCH"
+    method: "PATCH",
   });
   const json = await res.json();
 
@@ -64,16 +65,27 @@ downVote.addEventListener("click", async (event) => {
 });
 
 commentPost.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const res = await fetch("/kitten/comments", {
-        method: "POST"
-    });
-    const json = await res.json();
+  event.preventDefault();
 
-    if (!res.ok) {
-        errorField.innerHTML = json.message;
-    } else {
-        comments.innerHTML = json.comments;
-        document.getElementById("user-comment").innerHTML = "unset";
-    }
-} )
+  const formData = new FormData(commentPost);
+  const comment = formData.get("user-comment");
+
+  console.log(JSON.stringify({ comment }));
+
+  const res = await fetch("/kitten/comments", {
+    method: "POST",
+    header: { "Content-Type": "application/json" },
+    body: JSON.stringify({ comment }),
+  });
+  const json = await res.json();
+  console.log(formData);
+  console.log(json);
+
+  if (!res.ok) {
+    errorField.innerHTML = json.message;
+  } else {
+    comments.innerHTML = json.comments;
+    // console.log(json.comments);
+    // userComment.innerHTML = "";
+  }
+});
